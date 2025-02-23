@@ -1,13 +1,13 @@
 package pkg.iot_lab;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.github.angads25.toggle.model.ToggleableView;
 import com.github.angads25.toggle.widget.LabeledSwitch;
@@ -17,9 +17,11 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     LabeledSwitch btn1, btn2;
     LineChart lineChartTemp, lineChartHumid, lineChartLight;
     DatabaseHelper databaseHelper;
-    WebView webView;
     List<Entry> tempData = new ArrayList<>();
     List<Entry> humidData = new ArrayList<>();
     List<Entry> lightData = new ArrayList<>();
@@ -43,17 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
         btn1 = findViewById(R.id.btn1);
 
+
         lineChartTemp = findViewById(R.id.lineChartTemp);
         lineChartHumid = findViewById(R.id.lineChartHumid);
         lineChartLight = findViewById(R.id.lineChartLight);
 
         databaseHelper = new DatabaseHelper(this);
-
-        webView = findViewById(R.id.webViewCamera);
-
-        // Cấu hình WebView để hiển thị luồng từ DroidCam
-        setupWebView();
-
 
         // Load existing data from database
         tempData = databaseHelper.getAllSensorData(DatabaseHelper.TABLE_TEMP);
@@ -63,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
         updateChartData(lineChartTemp, tempData);
         updateChartData(lineChartHumid, humidData);
         updateChartData(lineChartLight, lightData);
-
-
 
         // Set the latest values to the TextViews
         if (!tempData.isEmpty()) {
@@ -129,18 +123,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             chart.setVisibility(View.GONE);
         }
-    }
-
-    private void setupWebView() {
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-
-        // Đặt WebViewClient để xử lý bên trong app
-        webView.setWebViewClient(new WebViewClient());
-
-        // Load URL DroidCam (cập nhật địa chỉ IP nếu cần)
-        webView.loadUrl("http://192.168.1.4:4747/video");
     }
 
     private void setupChart(LineChart chart, String label) {
