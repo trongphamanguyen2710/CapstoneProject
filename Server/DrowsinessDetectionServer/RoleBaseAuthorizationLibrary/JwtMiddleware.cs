@@ -21,7 +21,7 @@ public class JwtMiddleware
             if (token != null)
             {
                 long? userId = await jwtService.ValidateJwtToken(token);
-                if (userId != null) context.Items["AuthorizationUser"] = AuthorizationData.GetUserByToken(token);
+                if (userId != null) context.Items["AuthorizationUser"] = await AuthorizationData.GetUserByToken(token);
             }
             await next(context);
         }

@@ -48,4 +48,8 @@
 		<Folder Include="Log\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\RoleBaseAuthorizationLibrary\RoleBaseAuthorizationLibrary.csproj" />
+	</ItemGroup>
+
 </Project>
