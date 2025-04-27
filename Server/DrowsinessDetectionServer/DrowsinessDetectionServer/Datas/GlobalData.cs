@@ -9,7 +9,7 @@ public static class GlobalData
 
     public static void SeedUser(ApplicationDbContext dbContext)
     {
-        if (dbContext.User.FirstOrDefault(x => x.Role == Role.Admin) != null) return;
+        if (dbContext.Users.FirstOrDefault(x => x.Role == Role.Admin) != null) return;
         User seedAdmin = new()
         {
             UserName = "ThaiAn",
@@ -17,7 +17,7 @@ public static class GlobalData
             Role = Role.Admin,
             Email = "daylakato1104@gmail.com",
         };
-        dbContext.User.Add(seedAdmin);
+        dbContext.Users.Add(seedAdmin);
         dbContext.SaveChanges();
     }
 

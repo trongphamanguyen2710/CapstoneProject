@@ -4,6 +4,7 @@ using DrowsinessDetectionServer.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrowsinessDetectionServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250426134544_DriverFaceData")]
+    partial class DriverFaceData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,42 +24,6 @@ namespace DrowsinessDetectionServer.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("DriverId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("SessionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DriverId");
-
-                    b.HasIndex("SessionId");
-
-                    b.ToTable("DetectionLogs", (string)null);
-                });
 
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.FaceData", b =>
                 {
@@ -90,62 +57,6 @@ namespace DrowsinessDetectionServer.Migrations
                         .HasFilter("[DriverId] IS NOT NULL");
 
                     b.ToTable("FaceDatas", (string)null);
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.MonitorSession", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("DriverId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DriverId");
-
-                    b.ToTable("MonitorSessions", (string)null);
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.NotificationLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("DetectionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<long>("SupervisorId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DetectionId");
-
-                    b.HasIndex("SupervisorId");
-
-                    b.ToTable("NotificationLogs", (string)null);
                 });
 
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.User", b =>
@@ -221,25 +132,6 @@ namespace DrowsinessDetectionServer.Migrations
                     b.ToTable("Supervisors", (string)null);
                 });
 
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", b =>
-                {
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.Driver", "Driver")
-                        .WithMany("DetectionLogs")
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.MonitorSession", "Session")
-                        .WithMany("DetectionLogs")
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Driver");
-
-                    b.Navigation("Session");
-                });
-
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.FaceData", b =>
                 {
                     b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.Driver", "Driver")
@@ -248,36 +140,6 @@ namespace DrowsinessDetectionServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Driver");
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.MonitorSession", b =>
-                {
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.Driver", "Driver")
-                        .WithMany("MonitorSessions")
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Driver");
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.NotificationLog", b =>
-                {
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", "Detection")
-                        .WithMany("NotificationLogs")
-                        .HasForeignKey("DetectionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.Supervisor", "Supervisor")
-                        .WithMany("NotificationLogs")
-                        .HasForeignKey("SupervisorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Detection");
-
-                    b.Navigation("Supervisor");
                 });
 
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.Driver", b =>
@@ -305,30 +167,14 @@ namespace DrowsinessDetectionServer.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", b =>
-                {
-                    b.Navigation("NotificationLogs");
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.MonitorSession", b =>
-                {
-                    b.Navigation("DetectionLogs");
-                });
-
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.Driver", b =>
                 {
-                    b.Navigation("DetectionLogs");
-
                     b.Navigation("FaceData");
-
-                    b.Navigation("MonitorSessions");
                 });
 
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.Supervisor", b =>
                 {
                     b.Navigation("Drivers");
-
-                    b.Navigation("NotificationLogs");
                 });
 #pragma warning restore 612, 618
         }

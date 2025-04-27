@@ -29,60 +29,17 @@ public class AuthenticateService : IAuthenticateService
         caller = ((GetType().Namespace?.Split('.') ?? []).LastOrDefault() + "." ?? "Unknown.") + GetType().Name;
     }
 
-    public async Task<BaseResponse> RegisterAsync(RegisterRequest request)
-    {
-        try
-        {
-            if (await dbContext.User.FirstOrDefaultAsync(x => x.UserName == request.UserName) != null)
-            {
-                message = $"Register failed, username ({request.UserName}) already exists";
-                logService.Logging(LogLevel.Debug, message, caller);
-                return new()
-                {
-                    StatusCode = StatusCodes.Status400BadRequest,
-                    Message = "Bad Request: User name already exists",
-                };
-            }
-            User newUser = new(request);
-            dbContext.User.Add(newUser);
-            await dbContext.SaveChangesAsync();
-            cacheService.AddOrUpdateCacheById(CacheData.USER_CACHE_KEY, newUser.Id, newUser);
-            message = $"Register success (UserId {newUser.Id})";
-            logService.Logging(LogLevel.Debug, message, caller);
-            return new()
-            {
-                StatusCode = StatusCodes.Status200OK,
-                Message = "Ok",
-            };
-        }
-        catch (DbUpdateException ex)
-        {
-            message = "Database Error: " + ex.Message;
-            logService.Logging(LogLevel.Error, message, caller);
-            foreach (EntityEntry entry in ex.Entries) await entry.ReloadAsync();
-            return new()
-            {
-                StatusCode = StatusCodes.Status500InternalServerError,
-                Message = message,
-            };
-        }
-        catch (Exception ex)
-        {
-            message = "Internal Server Error: " + ex.Message;
-            logService.Logging(LogLevel.Error, message, caller);
-            return new()
-            {
-                StatusCode = StatusCodes.Status500InternalServerError,
-                Message = message,
-            };
-        }
-    }
+    public Task<BaseResponse> RegisterUserAsync(RegisterRequest request) => RegisterEntityAsync<User>(request);
+
+    public Task<BaseResponse> RegisterDriverAsync(RegisterRequest request) => RegisterEntityAsync<Driver>(request);
+
+    public Task<BaseResponse> RegisterSupervisorAsync(RegisterRequest request) => RegisterEntityAsync<Supervisor>(request);
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         try
         {
-            User? user = await dbContext.User.FirstOrDefaultAsync(x => x.UserName == request.UserName);
+            User? user = await dbContext.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName);
             if (user == null || !VerifyPassword(request.Password, user.Password))
             {
                 message = $"Wrong user name or password (UserName {request.UserName})";
@@ -273,6 +230,38 @@ public class AuthenticateService : IAuthenticateService
         }
     }
 
+    private async Task<BaseResponse> RegisterEntityAsync<T>(RegisterRequest request) where T : User, new()
+    {
+        DbSet<T> dbSet = dbContext.Set<T>();
+        if (await dbSet.FirstOrDefaultAsync(x => x.UserName == request.UserName) != null)
+        {
+            string entityName = typeof(T).Name;
+            message = $"Register failed, {entityName} name ({request.UserName}) already exists";
+            logService.Logging(LogLevel.Debug, message, caller);
+            return new()
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = $"Bad Request: {entityName} name already exists",
+            };
+        }
+        T newEntity = new()
+        {
+            UserName = request.UserName,
+            Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Role = request.Role,
+        };
+        dbSet.Add(newEntity);
+        await dbContext.SaveChangesAsync();
+        cacheService.AddOrUpdateCacheById(CacheData.USER_CACHE_KEY, newEntity.Id, newEntity);
+        message = $"Register success ({typeof(T).Name}Id {newEntity.Id})";
+        logService.Logging(LogLevel.Debug, message, caller);
+        return new()
+        {
+            StatusCode = StatusCodes.Status200OK,
+            Message = "Ok",
+        };
+    }
+
     private static bool VerifyPassword(string password, string hashedPassword)
     {
         return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
@@ -281,7 +270,9 @@ public class AuthenticateService : IAuthenticateService
 
 public interface IAuthenticateService
 {
-    Task<BaseResponse> RegisterAsync(RegisterRequest request);
+    Task<BaseResponse> RegisterUserAsync(RegisterRequest request);
+    Task<BaseResponse> RegisterDriverAsync(RegisterRequest request);
+    Task<BaseResponse> RegisterSupervisorAsync(RegisterRequest request);
     Task<LoginResponse> LoginAsync(LoginRequest request);
     Task<BaseResponse> LogOutAsync(string token);
     Task<BaseResponse> ChangePasswordAsync(ChangePasswordRequest request, User currentUser, string token);

@@ -9,6 +9,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrowsinessDetectionServer.Controllers;
 
+[Route("drownsiness/api/authen")]
+[ApiController]
 public class AuthenticateController : ControllerBase
 {
     private readonly IAuthenticateService authenticateService;
@@ -56,7 +58,12 @@ public class AuthenticateController : ControllerBase
                     Message = "Bad Request: Invalid password",
                 });
             }
-            BaseResponse response = await authenticateService.RegisterAsync(request);
+            BaseResponse response = request.Role switch
+            {
+                Role.Driver => await authenticateService.RegisterDriverAsync(request),
+                Role.Supervisor => await authenticateService.RegisterSupervisorAsync(request),
+                _ => await authenticateService.RegisterUserAsync(request),
+            };
             return StatusCode(response.StatusCode, response);
         }
         catch (Exception ex)

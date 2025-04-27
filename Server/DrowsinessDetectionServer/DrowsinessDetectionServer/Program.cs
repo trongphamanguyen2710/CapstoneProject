@@ -1,6 +1,7 @@
 using DrowsinessDetectionServer.Datas;
 using DrowsinessDetectionServer.Services.ScopedServices;
 using DrowsinessDetectionServer.Services.SingletonServices;
+using DrowsinessDetectionServer.SignalR;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -22,6 +23,9 @@ builder.Services.AddHttpClient();
 
 // Use memory cache
 builder.Services.AddMemoryCache();
+
+// Add SignalR services
+builder.Services.AddSignalR();
 
 // Add controller
 builder.Services.AddControllers().AddJsonOptions
@@ -103,8 +107,12 @@ builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddSingleton<ILogService, LogService>();
 
 // Configure scoped services
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IDetectionService, DetectionService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Build the app
 WebApplication app = builder.Build();
@@ -150,6 +158,9 @@ app.UseMiddleware<WebSocketMiddleware>();
 
 // Custom jwt auth middleware
 app.UseMiddleware<JwtMiddleware>();
+
+// Map the hub
+app.MapHub<ChatHub>("/chatHub");
 
 // Run the app
 app.Run();

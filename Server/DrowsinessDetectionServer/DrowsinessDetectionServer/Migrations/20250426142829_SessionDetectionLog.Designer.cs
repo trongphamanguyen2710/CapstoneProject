@@ -4,6 +4,7 @@ using DrowsinessDetectionServer.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrowsinessDetectionServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250426142829_SessionDetectionLog")]
+    partial class SessionDetectionLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,35 +120,6 @@ namespace DrowsinessDetectionServer.Migrations
                     b.HasIndex("DriverId");
 
                     b.ToTable("MonitorSessions", (string)null);
-                });
-
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.NotificationLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("DetectionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<long>("SupervisorId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DetectionId");
-
-                    b.HasIndex("SupervisorId");
-
-                    b.ToTable("NotificationLogs", (string)null);
                 });
 
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.User", b =>
@@ -261,25 +235,6 @@ namespace DrowsinessDetectionServer.Migrations
                     b.Navigation("Driver");
                 });
 
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.NotificationLog", b =>
-                {
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", "Detection")
-                        .WithMany("NotificationLogs")
-                        .HasForeignKey("DetectionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.Supervisor", "Supervisor")
-                        .WithMany("NotificationLogs")
-                        .HasForeignKey("SupervisorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Detection");
-
-                    b.Navigation("Supervisor");
-                });
-
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.Driver", b =>
                 {
                     b.HasOne("DrowsinessDetectionServer.Models.DatabaseModels.User", null)
@@ -305,11 +260,6 @@ namespace DrowsinessDetectionServer.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.DetectionLog", b =>
-                {
-                    b.Navigation("NotificationLogs");
-                });
-
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.MonitorSession", b =>
                 {
                     b.Navigation("DetectionLogs");
@@ -327,8 +277,6 @@ namespace DrowsinessDetectionServer.Migrations
             modelBuilder.Entity("DrowsinessDetectionServer.Models.DatabaseModels.Supervisor", b =>
                 {
                     b.Navigation("Drivers");
-
-                    b.Navigation("NotificationLogs");
                 });
 #pragma warning restore 612, 618
         }
